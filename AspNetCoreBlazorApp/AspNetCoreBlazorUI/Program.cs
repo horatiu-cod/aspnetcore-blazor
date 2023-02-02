@@ -1,6 +1,4 @@
 using AspNetCoreBlazorUI.Startup_Services;
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Web;
 
 var builder = WebApplication.CreateBuilder(args);
 
