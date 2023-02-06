@@ -1,0 +1,121 @@
+﻿@page "/seafarer"
+@inject ISeafarerRepository _seafarerRepository
+
+@if (DeleteDialogOpen)
+{
+    <_DeleteConfirmation IsParentComponentProcesing="IsLoading"
+                     Title="Delete Confirmation"
+                     Text="@($"Are you sure do you want to delete ")"
+                     OnClose="@OnDeleteDialogClose">
+    </_DeleteConfirmation>
+}
+
+<div class="row mt-4">
+    <div class="col-6">
+        <h4 class="card-title text-primary">Seafarer List</h4>
+    </div>
+    <div class="col-2 offset-3">
+        <a href="seafarer/create"class="btn btn-primary form-control">Add New Seafarer</a>
+    </div>
+    <div class="col-12">
+        @if (Seafarers.Any())
+        {
+            <table class="table table-bordered" >
+                <thead>
+                    <tr>
+                        <td>Name</td>
+                        <td>Email</td>
+                        <td>Rank</td>
+                        <td>Actions</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var objSeaf in Seafarers)
+                    {
+                        <tr class="bg-gradient">
+                            <td class="col-2">
+                                @objSeaf.FullName
+                            </td>
+                            <td class="col-2">
+                                @objSeaf.Email
+                            </td>
+                            <td class="col-1">
+                                @objSeaf.Rank
+                            </td>
+                            <td class="col-2">
+                                <NavLink href="@($"seafarer/edit/{objSeaf.SeafarerId}")" class="btn btn-primary">Edit</NavLink>
+                                <button class="btn btn-danger" @onclick="(()=>HandleDelete(objSeaf.SeafarerId))">Delete</button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            if (IsLoading)
+            {
+                //Load Gif
+                <div class="text-center">
+                    <img src="/images/loading.gif" />
+                </div>
+            }
+            else
+            {
+                // no records
+                <p>No records found</p>
+            }
+        }
+    </div>
+</div>
+
+@code {
+    private IEnumerable<Seafarer> Seafarers { get; set; } = new List<Seafarer>();
+    public bool IsLoading { get; set; }
+    private int DeleteSeafarerId { get; set; } = 0;
+    public bool DeleteDialogOpen { get; set; }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    { 
+        if (firstRender)
+        {
+            await LoadSeafarers();
+        }
+
+    }
+
+    private async Task LoadSeafarers()
+    {
+        IsLoading = true;
+        StateHasChanged();
+        Seafarers = await _seafarerRepository.GetAll();
+        IsLoading = false;
+        StateHasChanged();
+    }
+
+    private void HandleDelete(int id)
+    {
+        DeleteDialogOpen = true;
+        StateHasChanged();
+        DeleteSeafarerId = id;
+    }
+
+    private async Task OnDeleteDialogClose( bool IsConfirmed)
+    {
+        IsLoading = true;
+        if (IsConfirmed && DeleteSeafarerId != 0)
+        {
+
+            await _seafarerRepository.Delete(DeleteSeafarerId);
+            await LoadSeafarers();
+            DeleteDialogOpen = false;
+            StateHasChanged();
+        }
+        else
+        {
+            DeleteDialogOpen = false;
+            StateHasChanged();
+        }
+        IsLoading = false;
+    }
+}
