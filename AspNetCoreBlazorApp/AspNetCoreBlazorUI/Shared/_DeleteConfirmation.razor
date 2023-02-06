@@ -1,0 +1,54 @@
+﻿
+    <div class="modal fade show" style="display:block; background-color:rgba(10,10,10,.8)" aria-modal="true" role="dialog" @onclick="ModalCancel">
+        <div class="modal-dialog" @onclick:stopPropagation="true">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">@Title</h4>
+                    @*<button type="button" class="close" @onclick="ModalCancel">&times;</button>*@
+                </div>
+                <div class="modal-body">
+                    <p>@Text</p>
+                </div>
+                @if (IsParentComponentProcesing)
+                {
+                    <div class="modal-footer">
+                        <button type="button" class="btn" disabled >Cancel</button>
+                        <button type="button" class="btn btn-danger" disabled>Processing...</button>
+                    </div>
+                }
+                else
+                {
+                    <div class="modal-footer">
+                        <button type="button" class="btn" @onclick="ModalCancel" >Cancel</button>
+                        <button type="button" class="btn btn-danger" @onclick=ModalOk>Delete</button>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+
+@code
+{
+    [Parameter]
+    public bool IsParentComponentProcesing { get; set; }
+
+    [Parameter]
+    public string? Title { get; set; }
+
+    [Parameter]
+    public string? Text { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> OnClose { get; set; }
+
+    private Task ModalCancel()
+    {
+        return OnClose.InvokeAsync(false);
+    }
+
+    private Task ModalOk()
+    {
+        return OnClose.InvokeAsync(true);
+    }
+}
